@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import requests
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 
@@ -70,3 +71,29 @@ with col2:
         st.balloons()
     else:
         st.error("Not enough data for prediction. Need at least 10 historical data points.")
+
+# Disease News Section
+st.subheader("📰 Latest Disease Outbreak News")
+
+news_api_key = "0056df10504d493188bae5b4bb973ab5"  # Replace with your API key
+news_url = f"https://newsapi.org/v2/everything?q=disease outbreak OR virus OR epidemic&language=en&sortBy=publishedAt&apiKey={news_api_key}"
+
+try:
+    response = requests.get(news_url)
+    news_data = response.json()
+
+    if news_data["status"] == "ok":
+        articles = news_data["articles"][:5]  # Show latest 5 articles
+
+        for article in articles:
+            st.markdown(f"### [{article['title']}]({article['url']})")
+            st.write(f"🗞 **Source:** {article['source']['name']}")
+            st.write(f"📅 **Published:** {article['publishedAt'][:10]}")
+            st.write(f"📝 {article['description']}")
+            st.image(article["urlToImage"], width=500)
+            st.markdown("---")
+    else:
+        st.error("⚠️ Could not fetch news. Please check your API key or try again later.")
+
+except Exception as e:
+    st.error(f"⚠️ Error fetching news: {e}")
