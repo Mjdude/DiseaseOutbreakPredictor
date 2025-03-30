@@ -34,7 +34,15 @@ if "REGION" in df.columns:
 
 # Preprocessing
 scaler = MinMaxScaler()
+# Convert column to numeric, forcing errors='coerce' to convert invalid values to NaN
+df["% WEIGHTED ILI"] = pd.to_numeric(df["% WEIGHTED ILI"], errors="coerce")
+
+# Handle NaN values (Fill with median to retain data distribution)
+df["% WEIGHTED ILI"].fillna(df["% WEIGHTED ILI"].median(), inplace=True)
+
+# Apply scaling
 df["% WEIGHTED ILI"] = scaler.fit_transform(df[["% WEIGHTED ILI"]])
+
 
 # Layout for better UI
 col1, col2 = st.columns([2, 1])
