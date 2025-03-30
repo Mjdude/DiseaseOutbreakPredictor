@@ -23,37 +23,26 @@ st.set_page_config(page_title="Disease Outbreak Prediction", layout="wide")
 st.title("📊 Disease Outbreak Prediction System")
 st.markdown("This tool predicts the spread of diseases based on past data trends.")
 
-# 🌍 Enhanced Region Selection UI
-st.sidebar.header("🌍 Select a Region")
-regions = ["India", "USA", "UK", "Australia", "Canada"]
-selected_region = st.sidebar.radio("Choose a region:", regions)
-
-# Filter dataset for selected region
+# ✅ Region Selection
 if "REGION" in df.columns:
+    regions = df["REGION"].unique().tolist()
+    selected_region = st.selectbox("🌍 Select a Region:", regions)
     df = df[df["REGION"] == selected_region]
 
 # Preprocessing
 scaler = MinMaxScaler()
-# Convert column to numeric, forcing errors='coerce' to convert invalid values to NaN
-df["% WEIGHTED ILI"] = pd.to_numeric(df["% WEIGHTED ILI"], errors="coerce")
-
-# Handle NaN values (Fill with median to retain data distribution)
-df["% WEIGHTED ILI"].fillna(df["% WEIGHTED ILI"].median(), inplace=True)
-
-# Apply scaling
 df["% WEIGHTED ILI"] = scaler.fit_transform(df[["% WEIGHTED ILI"]])
-
 
 # Layout for better UI
 col1, col2 = st.columns([2, 1])
 
-# 📈 Historical Data Visualization
+# Plot historical data
 with col1:
     st.subheader(f"📈 Historical Trends in {selected_region}")
     fig = px.line(df, x="year", y="% WEIGHTED ILI", title=f"Influenza-like Illness Trends in {selected_region}", markers=True)
     st.plotly_chart(fig, use_container_width=True)
 
-# 🔮 Prediction Section
+# Prediction Section
 with col2:
     st.subheader(f"🔮 Predict Future Outbreaks in {selected_region}")
     days = st.slider("Select number of future days to predict:", 1, 30, 7)
@@ -85,10 +74,10 @@ with col2:
     else:
         st.error(f"Not enough data for prediction in {selected_region}. Need at least 10 historical data points.")
 
-# 📰 Disease News Section
-st.subheader(f"📰 Latest Disease Outbreak News in {selected_region}")
+# Disease News Section
+st.subheader("📰 Latest Disease Outbreak News")
 news_api_key = "0056df10504d493188bae5b4bb973ab5"
-news_url = f"https://newsapi.org/v2/everything?q={selected_region} disease outbreak OR virus OR epidemic&language=en&sortBy=publishedAt&apiKey={news_api_key}"
+news_url = f"https://newsapi.org/v2/everything?q=disease outbreak OR virus OR epidemic&language=en&sortBy=publishedAt&apiKey={news_api_key}"
 
 try:
     response = requests.get(news_url)
